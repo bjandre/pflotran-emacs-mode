@@ -25,6 +25,28 @@
 ;;  TAB : indent line
 ;;  M-TAB : keyword completion
 ;;
+;;; Known Issues:
+;;
+;;   * pflotran reuses some words as both keywords and section
+;;     names. This meas that regexp based syntax highlighting will
+;;     occasionally do the wrong thing.
+;;
+;;   * Species names can be essentially anything, so regexp will
+;;     catch just about anything. Most species names in the database
+;;     start with a capitaly letter, so we require all species names
+;;     to start with a capital letter. This causes keywords that
+;;     aren't explicitly listed to be highlighted as species names,
+;;     but allows other words that start with a lower case to be
+;;     visable.
+;;
+;;   * Indentation is currently based on looking at regexp on previous
+;;     lines, it will occasionally do the wrong thing when a word is
+;;     both a keyword and a section heading. It will also fail for
+;;     things like mineral kinetics where a species name starts a new
+;;     indentation block. When either of these happens, just manually
+;;     indent the first incorrect line and all following lines should
+;;     be determined correctly.
+;;
 ;;; Commentary:
 ;;
 ;;   * copy pflotran.el into ~/.emacs.d/
@@ -95,37 +117,43 @@
 (defvar end-section '("END" "/"))
 
 (defvar toplevel-keywords
-  '("MODE"
-    "CHECKPOINT"
-    "RESTART"
-    "WALLCLOCK_STOP"
+  '("CHECKPOINT"
+    "MODE"
+    "MINIMUM_HYDROSTATIC_PRESSURE"
+    "MULTIPLE_CONTINUUM"
     "PROC"
-    "UNIFORM_VELOCITY"
     "REFERENCE_POROSITY"
+    "REFERENCE_PRESSURE"
+    "RESTART"
+    "UNIFORM_VELOCITY"
+    "WALLCLOCK_STOP"
     ))
 
 (defvar toplevel-sections
-  '("GRID"
+  '("BOUNDARY_CONDITION"
     "CHEMISTRY"
-    "REGION"
-    "BOUNDARY_CONDITION"
-    "INITIAL_CONDITION"
-    "SOURCE_SINK"
-    "FLOW_CONDITION"
-    "TRANSPORT_CONDITION"
     "CONSTRAINT"
-    "TIMESTEPPER"
-    "TIME"
-    "LINEAR_SOLVER"
-    "NEWTON_SOLVER"
-    "FLUID_PROPERTY"
-    "SATURATION_FUNCTION"
-    "MATERIAL_PROPERTY"
-    "STRATA"
     "DATASET"
-    "OUTPUT"
-    "OBSERVATION"
     "DEBUG"
+    "FLOW_CONDITION"
+    "FLUID_PROPERTY"
+    "GRID"
+    "INITIAL_CONDITION"
+    "LINEAR_SOLVER"
+    "MATERIAL_PROPERTY"
+    "MODE"
+    "NEWTON_SOLVER"
+    "OBSERVATION"
+    "OUTPUT"
+    "REGION"
+    "REGRESSION"
+    "SATURATION_FUNCTION"
+    "SECONDARY_CONSTRAINT"
+    "SOURCE_SINK"
+    "STRATA"
+    "TIME"
+    "TIMESTEPPER"
+    "TRANSPORT_CONDITION"
     ))
 
 (defvar toplevel-all
@@ -154,7 +182,7 @@
     "MAX_RELATIVE_CHANGE_TOLERANCE"
     "MAX_RESIDUAL_TOLERANCE"
     "REACTION" "FORWARD_RATE" "BACKWARD_RATE"
-    "RATE_CONSTANT" "ACTIVIATION_ENERGY" "AFFINITY_THRESHOLD"
+    "RATE_CONSTANT" "ACTIVATION_ENERGY" "AFFINITY_THRESHOLD"
     "RATE_LIMITER" "IRREVERSIBLE" "SURFACE_AREA_POROSITY_POWER"
     "SURFACE_AREA_VOL_FRAC_POWER"
     "PREFACTOR_SPECIES" "ALPHA" "BETA" "ATTENUATION_COEF"
@@ -198,6 +226,63 @@
 
 (defvar constraint-all
   (append constraint-keywords constraint-sections))
+
+;;
+;; dataset
+;;
+(defvar dataset-keywords
+  '("HDF5_DATASET_NAME"
+    "MAX_BUFFER_SIZE"
+    ))
+
+(defvar dataset-sections
+  '(""
+    ))
+
+(defvar dataset-all
+  (append dataset-keywords dataset-sections))
+
+;;
+;; debug
+;;
+(defvar debug-keywords
+  '("MATVIEW_JACOBIAN"
+    "VECVIEW_RESIDUAL"
+    "VECVIEW_SOLUTION"
+    ))
+
+(defvar debug-sections
+  '(""
+    ))
+
+(defvar debug-all
+  (append debug-keywords debug-sections))
+
+;;
+;; flow conditions
+;;
+(defvar flow-keywords
+  '(
+    "DATUM"
+    "DATUM LIST"
+    "FLUX"
+    "INTERPOLATION LINEAR"
+    "PRESSURE"
+    "TEMPERATURE"
+    "CONCENTRATION"
+    "ENTHALPY"
+    "RATE"
+    "TIME_UNITS"
+    "UNITS"
+    ))
+
+(defvar flow-sections
+  '(;;"TYPE" ;; this cause a lot of problems with other keywords...
+    "GRADIENT"
+    ))
+
+(defvar flow-all
+  (append flow-keywords flow-sections))
 
 ;;
 ;; fluid properties
@@ -275,14 +360,36 @@
     "THERMAL_CONDUCTIVITY_WET"
     "PORE_COMPRESSIBILITY"
     "THERMAL_EXPANSITIVITY"
+    "TYPE" "SLAB"
+    "LENGTH"
+    "AREA"
+    "NUM_CELLS"
+    "EPSILON"
     ))
 
 (defvar material-property-sections
   '("PERMEABILITY"
+    "SECONDARY_CONTINUUM"
     ))
 
 (defvar material-property-all
   (append material-property-keywords material-property-sections))
+
+;;
+;; mode
+;;
+(defvar mode-keywords
+  '("RICHARDS"
+    "THC"
+    "TH"
+    ))
+
+(defvar mode-sections
+  '(""
+    ))
+
+(defvar mode-all
+  (append mode-keywords mode-sections))
 
 ;;
 ;; observation
@@ -291,6 +398,9 @@
   '("REGION"
     "VELOCITY"
     "AT_CELL_CENTER"
+    "SECONDARY_CONCENTRATION"
+    "SECONDARY_MINERAL_VOLFRAC"
+
     ))
 
 (defvar observation-sections
@@ -309,8 +419,9 @@
     "SCREEN PERIODIC"
     "PERIODIC_OBSERVATION"
     "PERIODIC"
-    "TIME"
     "TIMESTEP"
+    "TIMES"
+    "TIME"
     "FORMAT"
     "MASS_BALANCE"
     "FORMAT"
@@ -318,7 +429,9 @@
     "HDF5"
     "MULTIPLE_FILES"
     "POINT"
+    "PRINT_COLUMN_IDS"
     "PROCESSOR_ID"
+    "VELOCITIES"
     ))
 
 (defvar output-sections
@@ -336,6 +449,7 @@
     "BLOCK"
     "FILE"
     "FACE"
+    "NORTH" "SOUTH" "EAST" "WEST" "BOTTOM" "TOP"
     ))
 
 (defvar region-sections
@@ -346,14 +460,33 @@
   (append region-keywords region-sections))
 
 ;;
+;; regression
+;;
+(defvar regression-keywords
+  '("CELLS_PER_PROCESS"
+    ))
+
+(defvar regression-sections
+  '("CELLS"
+    ))
+
+(defvar regression-all
+  (append regression-keywords regression-sections))
+
+
+;;
 ;; saturation function
 ;;
 (defvar saturation-function-keywords
   '("SATURATION_FUNCTION_TYPE"
     "VAN_GENUCHTEN"
+    "BROOKS_COREY"
     "RESIDUAL_SATURATION"
     "LAMBDA"
     "ALPHA"
+    "LIQUID_PHASE"
+    "GAS_PHASE"
+    "MAX_CAPILLARY_PRESSURE"
     ))
 
 (defvar saturation-function-sections
@@ -367,7 +500,8 @@
 ;; newton and linear solver
 ;;
 (defvar solver-keywords
-  '("PRECONDITIONER_MATRIX_TYPE"
+  '("MATRIX_TYPE"
+    "PRECONDITIONER_MATRIX_TYPE"
     "AIJ"
     "RTOL"
     "ATOL"
@@ -376,6 +510,13 @@
     "NO_PRINT_CONVERGENCE"
     "PRINT_DETAILED_CONVERGENCE"
     "SOLVER DIRECT"
+    "MAX_NORM"
+    "ITOL_UPDATE"
+    "ITOL"
+    "MAXIT"
+    "MAXF"
+    "KSP_TYPE" "PREONLY"
+    "PC_TYPE" "LU"
     ))
 
 (defvar solver-sections
@@ -454,6 +595,7 @@
 
 (defvar transport-condition-sections
   '("CONSTRAINT_LIST"
+    "CONSTRAINT"
     ))
 
 (defvar transport-condition-all
@@ -469,13 +611,18 @@
   (append toplevel-all
           chemistry-all
           constraint-all
+          debug-all
+          dataset-all
+          flow-all
           fluid-property-all
           grid-all
           ic-bc-all
           material-property-all
+          mode-all
           observation-all
           output-all
           region-all
+          regression-all
           saturation-function-all
           solver-all
           strata-all
@@ -492,13 +639,18 @@
    toplevel-keywords
    chemistry-keywords
    constraint-keywords
+   debug-keywords
+   dataset-keywords
+   flow-keywords
    fluid-property-keywords
    grid-keywords
    ic-bc-keywords
    material-property-keywords
+   mode-keywords
    observation-keywords
    output-keywords
    region-keywords
+   regression-keywords
    saturation-function-keywords
    solver-keywords
    strata-keywords
@@ -516,13 +668,18 @@
                        end-section
                        chemistry-sections
                        constraint-sections
+                       debug-sections
+                       dataset-sections
+                       flow-sections
                        fluid-property-sections
                        grid-sections
                        ic-bc-sections
                        material-property-sections
+                       mode-sections
                        observation-sections
                        output-sections
                        region-sections
+                       regression-sections
                        saturation-function-sections
                        solver-sections
                        strata-sections
@@ -536,13 +693,18 @@
    toplevel-sections
    chemistry-sections
    constraint-sections
+   debug-sections
+   dataset-sections
+   flow-sections
    fluid-property-sections
    grid-sections
    ic-bc-sections
    material-property-sections
+   mode-sections
    observation-sections
    output-sections
    region-sections
+   regression-sections
    saturation-function-sections
    solver-sections
    strata-sections
@@ -566,7 +728,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defvar integer-re "[ \t]+[0-9]+\\>")
-(defvar float-re "\\<[-+]?[0-9]+\.\\([0-9]+\\)?[ed]?[-+]?[0-9]+\\>")
+(defvar float-re "\\<[-+]?[0-9]+\.\\([0-9]+\\)?[eEdD]?[-+]?[0-9]+\\>")
 (defvar species-name-re ">?[A-Z][A-Za-z0-9\(\)_]*[-+]*")
 
 ;;font-lock-builtin-face  font-lock-keyword-face
