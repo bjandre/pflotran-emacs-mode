@@ -100,6 +100,8 @@
     "RESTART"
     "WALLCLOCK_STOP"
     "PROC"
+    "UNIFORM_VELOCITY"
+    "REFERENCE_POROSITY"
     ))
 
 (defvar toplevel-sections
@@ -231,6 +233,22 @@
   (append grid-keywords grid-sections))
 
 ;;
+;; initial/boundary conditions
+;;
+(defvar ic-bc-keywords
+  '("TRANSPORT_CONDITION"
+    "FLOW_CONDITION"
+    "REGION"
+    ))
+
+(defvar ic-bc-sections
+  '(""
+    ))
+
+(defvar ic-bc-all
+  (append ic-bc-keywords ic-bc-sections))
+
+;;
 ;; material properties
 ;;
 (defvar material-property-keywords
@@ -300,6 +318,7 @@
     "HDF5"
     "MULTIPLE_FILES"
     "POINT"
+    "PROCESSOR_ID"
     ))
 
 (defvar output-sections
@@ -325,6 +344,46 @@
 
 (defvar region-all
   (append region-keywords region-sections))
+
+;;
+;; saturation function
+;;
+(defvar saturation-function-keywords
+  '("SATURATION_FUNCTION_TYPE"
+    "VAN_GENUCHTEN"
+    "RESIDUAL_SATURATION"
+    "LAMBDA"
+    "ALPHA"
+    ))
+
+(defvar saturation-function-sections
+  '(""
+    ))
+
+(defvar saturation-function-all
+  (append saturation-function-keywords saturation-function-sections))
+
+;;
+;; newton and linear solver
+;;
+(defvar solver-keywords
+  '("PRECONDITIONER_MATRIX_TYPE"
+    "AIJ"
+    "RTOL"
+    "ATOL"
+    "STOL"
+    "NO_INFINITY_NORM"
+    "NO_PRINT_CONVERGENCE"
+    "PRINT_DETAILED_CONVERGENCE"
+    "SOLVER DIRECT"
+    ))
+
+(defvar solver-sections
+  '(""
+    ))
+
+(defvar solver-all
+  (append solver-keywords solver-sections))
 
 ;;
 ;; strata
@@ -401,23 +460,6 @@
   (append transport-condition-keywords transport-condition-sections))
 
 
-;;
-;; initial conditions
-;;
-(defvar initial-condition-keywords
-  '("TRANSPORT_CONDITION"
-    "FLOW_CONDITION"
-    "REGION"
-    ))
-
-(defvar initial-condition-sections
-  '(""
-    ))
-
-(defvar initial-condition-all
-  (append initial-condition-keywords initial-condition-sections))
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;; Create some combined sections and regular expressions
@@ -429,14 +471,16 @@
           constraint-all
           fluid-property-all
           grid-all
+          ic-bc-all
           material-property-all
           observation-all
           output-all
           region-all
+          saturation-function-all
+          solver-all
           strata-all
           time-all
           timestepper-all
-          initial-condition-all
           transport-condition-all
           ))
 
@@ -450,14 +494,16 @@
    constraint-keywords
    fluid-property-keywords
    grid-keywords
+   ic-bc-keywords
    material-property-keywords
    observation-keywords
    output-keywords
    region-keywords
+   saturation-function-keywords
+   solver-keywords
    strata-keywords
    time-keywords
    timestepper-keywords
-   initial-condition-keywords
    transport-condition-keywords
    ))
 
@@ -472,14 +518,16 @@
                        constraint-sections
                        fluid-property-sections
                        grid-sections
+                       ic-bc-sections
                        material-property-sections
                        observation-sections
                        output-sections
                        region-sections
+                       saturation-function-sections
+                       solver-sections
                        strata-sections
                        time-sections
                        timestepper-sections
-                       initial-condition-sections
                        transport-condition-sections
                        ))))
 
@@ -490,14 +538,16 @@
    constraint-sections
    fluid-property-sections
    grid-sections
+   ic-bc-sections
    material-property-sections
    observation-sections
    output-sections
    region-sections
+   saturation-function-sections
+   solver-sections
    strata-sections
    time-sections
    timestepper-sections
-   initial-condition-sections
    transport-condition-sections
    ))
 
