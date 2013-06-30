@@ -151,8 +151,8 @@
     "SECONDARY_CONSTRAINT"
     "SOURCE_SINK"
     "STRATA"
-    "TIME"
     "TIMESTEPPER"
+    "TIME"
     "TRANSPORT_CONDITION"
     ))
 
@@ -190,14 +190,15 @@
     "LANGMUIR" "FREUNDLICH" "LANGMUIR_B" "FREUNDLICH_N"
     "EQUILIBRIUM" "MULTIRATE_KINETIC" "KINETIC" "COMPLEX_KINETICS"
     "MULTIRATE_SCALE_FACTOR" "COLLOID" "SITE"
-    "OFF" "ALL" "GASES" "PH" "KD" "COLLOIDS" "TOTAL_SORBED_MOBILE" "TOTAL_SORBED"
-    "FREE_ION" "SITE_DENSITY" "AGE"
+    "OFF" "ALL" "All" "GASES" "PH" "KD" "COLLOIDS" "TOTAL_SORBED_MOBILE"
+    "TOTAL_SORBED" "FREE_ION" "SITE_DENSITY" "AGE"
     ))
 
 (defvar chemistry-sections
   '("PRIMARY_SPECIES"
     "SECONDARY_SPECIES"
     "GAS_SPECIES"
+    "REDOX_SPECIES"
     "GENERAL_REACTION"
     "MINERALS"
     "MINERAL_KINETICS" "PREFACTOR"
@@ -216,7 +217,14 @@
 ;; constraint
 ;;
 (defvar constraint-keywords
-  '(""
+  '("\ F\ "
+    "\ G\ "
+    "\ M\ "
+    "\ P\ "
+    "\ pH\ "
+    "\ S\ "
+    "\ T\ "
+    "\ Z\ "
     ))
 
 (defvar constraint-sections
@@ -632,7 +640,7 @@
           ))
 
 (defvar pflotran-all-re
-  (regexp-opt pflotran-all 'words))
+  (regexp-opt pflotran-all 'symbols))
 
 (defvar pflotran-keywords
   (append
@@ -660,7 +668,7 @@
    ))
 
 (defvar pflotran-keywords-re
-  (regexp-opt pflotran-keywords 'words))
+  (regexp-opt pflotran-keywords 'symbols))
 
 (defvar pflotran-sections-re
   (concat toplevel-sections-re
@@ -729,7 +737,7 @@
 
 (defvar integer-re "[ \t]+[0-9]+\\>")
 (defvar float-re "\\<[-+]?[0-9]+\.\\([0-9]+\\)?[eEdD]?[-+]?[0-9]+\\>")
-(defvar species-name-re ">?[A-Z][A-Za-z0-9\(\)_]*[-+]*")
+(defvar species-name-re ">?[A-Z\(][A-Za-z0-9\(\)_\.]*[-+]*")
 
 ;;font-lock-builtin-face  font-lock-keyword-face
 (defvar pflotran-font-lock-defaults
@@ -739,7 +747,7 @@
 ;;     ( , pflotran-all-re . font-lock-keyword-face)
      ( , integer-re . font-lock-constant-face)
      ( , float-re . font-lock-constant-face)
-     ( , species-name-re . font-lock-function-name-face)
+     ( , species-name-re . font-lock-variable-name-face)
      )))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
